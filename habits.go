@@ -2,8 +2,16 @@ package habitify
 
 import (
 	"context"
+	"fmt"
 	"time"
 )
+
+type getHabitResp struct {
+	Message string `json:"message"`
+	Habit   *Habit `json:"data"`
+	Version string `json:"version"`
+	Status  bool   `json:"status"`
+}
 
 type listHabitsResp struct {
 	Message string   `json:"message"`
@@ -38,6 +46,21 @@ type Habit struct {
 	} `json:"area"`
 	CreatedDate time.Time `json:"created_date"`
 	Priority    float64   `json:"priority"`
+}
+
+func (c *Client) GetHabit(ctx context.Context, id string) (*Habit, error) {
+	resp, err := c.get(ctx, fmt.Sprintf("%s/%s", urlHabits, id))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Close()
+
+	var response getHabitResp
+	if err := resp.DecodeJSON(&response); err != nil {
+		return nil, err
+	}
+
+	return response.Habit, nil
 }
 
 func (c *Client) ListHabits(ctx context.Context) ([]*Habit, error) {
