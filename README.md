@@ -2,6 +2,10 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/kentakozuka/go-habitify.svg)](https://pkg.go.dev/github.com/kentakozuka/go-habitify)
 
+A [Habitify API](https://docs.habitify.me/) client for Golang
+
+## Example
+
 ```go
 package main
 
