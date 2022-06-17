@@ -11,20 +11,24 @@ import (
 	"net/http"
 )
 
+// DefaultEndpoint is the default endpoint of Habitify API.
 const DefaultEndpoint = "https://api.habitify.me"
 
 const (
 	urlHabits = "/habits"
 )
 
+// Client is a client for Habitify API.
 type Client struct {
 	httpClient *http.Client
 	apiKey     string
 	endpoint   string
 }
 
+// Option is an option for Client.
 type Option func(*Client)
 
+// New returns a new client associated with given api key.
 func New(apiKey string, opts ...Option) *Client {
 	c := &Client{
 		httpClient: http.DefaultClient,
@@ -39,12 +43,14 @@ func New(apiKey string, opts ...Option) *Client {
 	return c
 }
 
+// WithHTTPClient allows you to pass your http client.
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(c *Client) {
 		c.httpClient = httpClient
 	}
 }
 
+// WithEndpoint allows you to set an endpoint.
 func WithEndpoint(endpoint string) Option {
 	return func(c *Client) {
 		c.endpoint = endpoint
@@ -63,6 +69,7 @@ func (resp *httpResponse) DecodeJSON(data interface{}) error {
 	return nil
 }
 
+// Close closes the client.
 func (resp *httpResponse) Close() {
 	_, _ = io.Copy(ioutil.Discard, resp.Body)
 	_ = resp.Body.Close()
