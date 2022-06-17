@@ -1,0 +1,21 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'RELEASE'
+
+jobs:
+  gh-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: |
+          gh release create "$(cat RELEASE | sed -r 's/^version: (.+)$/\1/')" --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.html_url }}
