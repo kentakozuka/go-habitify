@@ -5,13 +5,13 @@ import (
 	"net/http"
 )
 
-type ErrPreconditionFailed struct {
-	msg string
-}
+type ErrPreconditionFailed struct{ msg string }
 
-func (e *ErrPreconditionFailed) Error() string {
-	return e.msg
-}
+func (e *ErrPreconditionFailed) Error() string { return e.msg }
+
+type ErrInternal struct{ msg string }
+
+func (e *ErrInternal) Error() string { return e.msg }
 
 func newError(statusCode int, msg string) error {
 	switch statusCode {
