@@ -6,20 +6,6 @@ import (
 	"time"
 )
 
-type getHabitResp struct {
-	Message string `json:"message"`
-	Habit   *Habit `json:"data"`
-	Version string `json:"version"`
-	Status  bool   `json:"status"`
-}
-
-type listHabitsResp struct {
-	Message string   `json:"message"`
-	Habits  []*Habit `json:"data"`
-	Version string   `json:"version"`
-	Status  bool     `json:"status"`
-}
-
 type Habit struct {
 	ID         string    `json:"id"`
 	Name       string    `json:"name"`
@@ -49,31 +35,21 @@ type Habit struct {
 }
 
 func (c *Client) GetHabit(ctx context.Context, id string) (*Habit, error) {
-	resp, err := c.get(ctx, fmt.Sprintf("%s/%s", urlHabits, id))
+	var habit Habit
+	err := c.get(ctx, fmt.Sprintf("%s/%s", urlHabits, id), &habit)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Close()
 
-	var response getHabitResp
-	if err := resp.DecodeJSON(&response); err != nil {
-		return nil, err
-	}
-
-	return response.Habit, nil
+	return &habit, nil
 }
 
 func (c *Client) ListHabits(ctx context.Context) ([]*Habit, error) {
-	resp, err := c.get(ctx, urlHabits)
+	var habits []*Habit
+	err := c.get(ctx, urlHabits, &habits)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Close()
 
-	var response listHabitsResp
-	if err := resp.DecodeJSON(&response); err != nil {
-		return nil, err
-	}
-
-	return response.Habits, nil
+	return habits, nil
 }

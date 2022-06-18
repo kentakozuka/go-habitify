@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,7 +15,15 @@ const DefaultEndpoint = "https://api.habitify.me"
 
 const (
 	urlHabits = "/habits"
+	urlNotes  = "/notes"
 )
+
+type apiResponse struct {
+	Message string          `json:"message"`
+	Version string          `json:"version"`
+	Status  bool            `json:"status"`
+	Data    json.RawMessage `json:"data"`
+}
 
 // Client is a client for Habitify API.
 type Client struct {
@@ -75,11 +82,11 @@ func (resp *httpResponse) Close() {
 	_ = resp.Body.Close()
 }
 
-func (c *Client) do(ctx context.Context, method, path string, body io.Reader) (*httpResponse, error) {
+func (c *Client) do(ctx context.Context, method, path string, body io.Reader, data interface{}) error {
 	req, err := http.NewRequestWithContext(ctx, method, c.endpoint+path, body)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	req.Header.Add("Authorization", c.apiKey)
@@ -87,41 +94,36 @@ func (c *Client) do(ctx context.Context, method, path string, body io.Reader) (*
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	defer resp.Body.Close()
+
+	httpResp := &httpResponse{Response: resp}
+	var apiResp apiResponse
+	if err := httpResp.DecodeJSON(&apiResp); err != nil {
+		return err
+	}
+	if !apiResp.Status {
+		return newError(resp.StatusCode, apiResp.Message)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusBadRequest:
-		return nil, errors.New("client has issues an invalid request")
-	case http.StatusUnauthorized:
-		return nil, errors.New("authorization for the API is required but the request has not been authenticated")
-	case http.StatusForbidden:
-		return nil, errors.New("the request has been authenticated but does not have permission or the resource is not found")
-	case http.StatusNotAcceptable:
-		return nil, errors.New("the client has requestd a MIM typ via the Accept header for a value not supported by the server")
-	case http.StatusUnsupportedMediaType:
-		return nil, errors.New("the client has defined a Content-Type header that is not supported by the server")
-	case http.StatusUnprocessableEntity:
-		return nil, errors.New("the client has made a valid request but the server cannot process it")
-	case http.StatusTooManyRequests:
-		return nil, errors.New("the client has exceeded the number of requests allowed for a givn time window")
-	case http.StatusInternalServerError:
-		return nil, errors.New("an unexpected error on the server has occurred")
+	if err := json.Unmarshal(apiResp.Data, data); err != nil {
+		return fmt.Errorf("decoding JSON data: %w", err)
 	}
 
-	return &httpResponse{Response: resp}, nil
+	return nil
 }
 
-func (c *Client) get(ctx context.Context, path string) (*httpResponse, error) {
-	return c.do(ctx, http.MethodGet, path, nil)
+func (c *Client) get(ctx context.Context, path string, data interface{}) error {
+	return c.do(ctx, http.MethodGet, path, nil, data)
 }
 
-func (c *Client) post(ctx context.Context, path string, body interface{}) (*httpResponse, error) {
+func (c *Client) post(ctx context.Context, path string, body interface{}) error {
 	var buf bytes.Buffer
 
 	if err := json.NewEncoder(&buf).Encode(body); err != nil {
-		return nil, err
+		return err
 	}
 
-	return c.do(ctx, http.MethodPost, path, &buf)
+	return c.do(ctx, http.MethodPost, path, &buf, nil)
 }
