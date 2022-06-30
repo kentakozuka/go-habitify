@@ -13,9 +13,10 @@ import (
 const DefaultEndpoint = "https://api.habitify.me"
 
 const (
-	urlHabits = "/habits"
-	urlNotes  = "/notes"
-	urlStatus = "/status"
+	urlHabits  = "/habits"
+	urlJournal = "/journal"
+	urlNotes   = "/notes"
+	urlStatus  = "/status"
 )
 
 type apiResponse struct {
