@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	STATUS_INPROGRESS = "in_progress"
-	STATUS_COMPLETED  = "completed"
-	STATUS_SKIPPED    = "skipped"
-	STATUS_FAILED     = "failed"
+	StatusInProgress = "in_progress"
+	StatusCompleted  = "completed"
+	StatusSkipped    = "skipped"
+	StatusFailed     = "failed"
 )
 
 type Status struct {
