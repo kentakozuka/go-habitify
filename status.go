@@ -10,6 +10,7 @@ const (
 	STATUS_INPROGRESS = "in_progress"
 	STATUS_COMPLETED  = "completed"
 	STATUS_SKIPPED    = "skipped"
+	STATUS_FAILED     = "failed"
 )
 
 type Status struct {
