@@ -7,12 +7,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"time"
 )
 
-// DefaultEndpoint is the default endpoint of Habitify API.
-const DefaultEndpoint = "https://api.habitify.me"
-
 const (
+	// DefaultEndpoint is the default endpoint of Habitify API.
+	DefaultEndpoint = "https://api.habitify.me"
+
+	dateFormat = "2006-01-02T15:04:05-07:00"
+
 	urlHabits  = "/habits"
 	urlJournal = "/journal"
 	urlNotes   = "/notes"
@@ -112,4 +116,8 @@ func (c *Client) post(ctx context.Context, path string, body interface{}) error 
 	}
 
 	return c.do(ctx, http.MethodPost, path, &buf, nil)
+}
+
+func formatTime(t time.Time) string {
+	return url.QueryEscape(t.Format(dateFormat))
 }

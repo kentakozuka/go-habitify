@@ -3,11 +3,8 @@ package habitify
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"time"
 )
-
-const dateFormat = "2006-01-02T15:04:05-07:00"
 
 type Note struct {
 	ID          string      `json:"id"`
@@ -26,8 +23,4 @@ func (c *Client) ListNotes(ctx context.Context, habitID string, from, to time.Ti
 	}
 
 	return notes, nil
-}
-
-func formatTime(t time.Time) string {
-	return url.QueryEscape(t.Format(dateFormat))
 }
